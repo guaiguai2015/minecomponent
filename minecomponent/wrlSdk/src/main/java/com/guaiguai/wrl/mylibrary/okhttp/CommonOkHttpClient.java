@@ -1,6 +1,8 @@
 package com.guaiguai.wrl.mylibrary.okhttp;
 
 import com.guaiguai.wrl.mylibrary.okhttp.Https.HttpsUtil;
+import com.guaiguai.wrl.mylibrary.okhttp.listener.DisposeDataHandle;
+import com.guaiguai.wrl.mylibrary.okhttp.response.CommonJsonCallBack;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -46,18 +48,28 @@ public class CommonOkHttpClient {
     }
 
     /**
-     * 发送指定的http/https请求
+     * get請求
      * @param request
-     * @param callback
+     * @param handle
+     * @return 需要返回值的原因是当你请求网络的时候，你退出这个界面的时候你得，手动将这个进行取消，节约资源
+     */
+    public static Call get (Request request, DisposeDataHandle handle) {
+        Call call = mOkHttpClient.newCall(request);
+        call.enqueue(new CommonJsonCallBack(handle));
+        return call;
+    }
+
+    /**
+     * post请求
+     * @param request
+     * @param handle
      * @return
      */
-    public static Call sendRequest (Request request, Callback callback) {
-
+    public static Call post (Request request,DisposeDataHandle handle) {
         Call call = mOkHttpClient.newCall(request);
-        call.enqueue(callback);
+        call.enqueue(new CommonJsonCallBack(handle));
         return call;
-
-
     }
+
 
 }

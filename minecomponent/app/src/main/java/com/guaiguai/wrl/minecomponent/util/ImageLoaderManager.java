@@ -30,7 +30,7 @@ public class ImageLoaderManager {
     private ImageLoader mLoader = null;
     private static ImageLoaderManager mInstance = null;
 
-    public ImageLoaderManager getmInstance (Context context){
+    public static ImageLoaderManager getInstance (Context context){
 
         if (mInstance == null) {
             synchronized (ImageLoaderManager.class) {
