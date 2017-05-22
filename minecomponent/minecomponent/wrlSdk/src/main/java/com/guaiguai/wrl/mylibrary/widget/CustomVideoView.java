@@ -32,7 +32,9 @@ import com.guaiguai.wrl.mylibrary.core.AdParameters;
  * Created by wei on 2017/5/18.
  */
 
-public class CustomVideoView extends RelativeLayout implements View.OnClickListener, TextureView.SurfaceTextureListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnInfoListener, MediaPlayer.OnBufferingUpdateListener {
+public class CustomVideoView extends RelativeLayout implements View.OnClickListener,
+        TextureView.SurfaceTextureListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
+        MediaPlayer.OnCompletionListener, MediaPlayer.OnInfoListener, MediaPlayer.OnBufferingUpdateListener {
 
     /**
      * 常量
@@ -151,9 +153,10 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
         if (this.playerState != STATE_IDLE) {   //如果现在的播放状态不是空闲状态的话就return
             return;
         }
+        //加载的过程中动画
         showLoadingView();
         try{
-            //加载成功之后
+            //加载的过程中 你需要将你的播放器的状态设置为空闲状态，进行还原的处理
             //重新设置播放状态
             setCurrentPlayState(STATE_IDLE);
             //创建播放器
@@ -169,13 +172,14 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
     }
 
     /**
-     * 设置播放器的声音
+     * 设置播放器的声音 为静音
      * @param mute
      */
     private void mute(boolean mute) {
         isMute = mute;
         if(mediaPlayer != null && audioManager != null) {
             float volume = isMute ? 0.0f : 1.0f;
+            //设置mediaPlayer的声音
             mediaPlayer.setVolume(volume,volume);
         }
 
@@ -189,14 +193,17 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
     }
 
     private MediaPlayer createMediaPlayer() {
+        //将所有的mediaPlayer 都进行还原
         mediaPlayer = new MediaPlayer();
         mediaPlayer.reset();
+
         mediaPlayer.setOnPreparedListener(this);   //加载的时候的监听
         mediaPlayer.setOnErrorListener(this);     //对错误的进行监听
         mediaPlayer.setOnCompletionListener(this);   //完成之后的监听
         mediaPlayer.setOnInfoListener(this);        //
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
+        //判断surface是否为空，并且可用
         if (videoSurface != null && videoSurface.isValid()) {
             mediaPlayer.setSurface(videoSurface);
         }else {
@@ -211,10 +218,15 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
      */
     private void stop() {
 
+        //相当于清空所有的mediaplayer所有的东西
         if (this.mediaPlayer != null) {
+            //重置播放器
             this.mediaPlayer.reset();
+            //设置播放器的进度条的追踪  停止发送消息  停止一切之前设置过这个监听器的一切的事务
             this.mediaPlayer.setOnSeekCompleteListener(null);
+            //停止mediPlayer
             this.mediaPlayer.stop();
+            //释放mediaplayer的缓存
             this.mediaPlayer.release();
             this.mediaPlayer = null;
         }
@@ -232,6 +244,7 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
 
     }
 
+    //播放时候的view的存在情况
     private void showPlayView (){
         mLoadingBar.clearAnimation();
         mLoadingBar.setVisibility(View.GONE);
@@ -288,7 +301,10 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
 
 
     /**
-     * 异步加载异帧图？？？？？？？？
+     * 异步加载异帧图
+     * 这个就相当于一个网络进行加载的过程中你显示的图片给用户来看，
+     * 有的话就行服务器给予的图片
+     * 如果没有的话就是加载你本地所有的默认图片
      */
     private void loadFrameImage() {
         if (mFrameLoadListener != null) {
@@ -346,7 +362,8 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
 
 
     /**
-     * 比阿诗textureview已经准备完毕
+     * 这个是TextureView的监听器跟MediaPLayer无关
+     * 确定textureview是否已经准备完毕
      * @param surface
      * @param width
      * @param height
@@ -384,16 +401,25 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
         showPlayView();
         mediaPlayer = mp;
         if (mediaPlayer != null) {
+            //设置mediaplayer的缓冲监听器
             mediaPlayer.setOnBufferingUpdateListener(this);
+            //设置加载的次数为0次
             mCurrentCount = 0;
+            //这只是一个外界的回调函数，通知外界做什么改变
             if (listener != null) {
                listener.onAdVideoLoadSuccess();
             }
+
+            //两个判断条件
+            //第一个判断条件是 判断当前网络是个什么状态
+            //第二个判断条件是  判断当前的item的超过来屏幕来50%没有
             if (Utils.canAutoPlay(mContext, AdParameters.getCurrentSetting())
                     && Utils.getVisiblePercent(mParentContainer) > SDKConstant.VIDEO_SCREEN_PERCENT) {
+                //开始播放 设置当前的播放状态是暂停状态
                 setCurrentPlayState(STATE_PAUSING);
                 resume();
             }else {
+                //暂停
                 setCurrentPlayState(STATE_PLAYING);
                 pause();
             }
@@ -419,6 +445,7 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
         }
         //展示暂停的界面布局
         this.showPauseView(false);
+        //移除掉所有的消息信息
         mHandler.removeCallbacksAndMessages(null);
     }
 
@@ -431,13 +458,13 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
         if (playerState != STATE_PAUSING) {
             return;
         }
-        if (!isPlaying()) {
+        if (!isPlaying()) {   //当前没有在播放
             entryResumeState();
             mediaPlayer.setOnSeekCompleteListener(null);
             mediaPlayer.start();
             mHandler.sendEmptyMessage(TIME_MSG);
             showPauseView(true);
-        }else {
+        }else {    //当前在播放
             showPauseView(false);
         }
     }
@@ -447,8 +474,11 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
      */
     private void entryResumeState() {
         canPlay = true;
+        //设置当前播放状态为播放状态
         setCurrentPlayState(STATE_PLAYING);
+        //没有真正的暂停
         setIsRealPause(false);
+        //没有真正的播放完毕
         setIsComplete(false);
 
     }
@@ -475,6 +505,10 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
     }
 
 
+    /**
+     * 判断当前mediaPlayer是否进行来播放
+     * @return
+     */
     private boolean isPlaying() {
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             return true;

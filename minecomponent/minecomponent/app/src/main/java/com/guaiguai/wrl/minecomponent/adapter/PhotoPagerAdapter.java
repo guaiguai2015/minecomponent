@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.guaiguai.wrl.minecomponent.util.ImageLoaderManager;
 import com.guaiguai.wrl.mylibrary.adutil.Utils;
@@ -73,6 +74,15 @@ public class PhotoPagerAdapter extends PagerAdapter {
             ViewGroup parent = (ViewGroup)vp;
             parent.removeView(view);
         }
+
+
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //在这里面做相应的页面跳转操作
+            }
+        });
+
         container.addView(view);
 
         return view;

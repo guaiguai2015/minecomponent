@@ -38,15 +38,26 @@ public class Utils {
         return (int) (pxValue / scale);
     }
 
+    /**
+     * 得到目前的可见的百分比
+     * 这里面有一个问题就是 你这个mediaplayer是在这个listview里面的，你不能得到这个item在这个window中的比例的
+     * @param pView
+     * @return
+     */
     public static int getVisiblePercent(View pView) {
         if (pView != null && pView.isShown()) {
+            //获取屏幕的宽
             DisplayMetrics displayMetrics = pView.getContext().getResources().getDisplayMetrics();
             int displayWidth = displayMetrics.widthPixels;
             Rect rect = new Rect();
+            //得到这个parentView的可见的矩形
             pView.getGlobalVisibleRect(rect);
             if ((rect.top > 0) && (rect.left < displayWidth)) {
+                //得到可见的矩形的面积
                 double areaVisible = rect.width() * rect.height();
+                //得到这个parentView的可见的矩形的面积
                 double areaTotal = pView.getWidth() * pView.getHeight();
+                //求的这个可见的面积与整个固定的面积的比例是一定的
                 return (int) ((areaVisible / areaTotal) * 100);
             } else {
                 return -1;
@@ -55,12 +66,19 @@ public class Utils {
         return -1;
     }
 
-    //is wifi connected
+
+    /**
+     * 判断当前的wifi是否进行连接着
+     * @param context
+     * @return
+     */
     public static boolean isWifiConnected(Context context) {
+        //查找项目主配置文件中wifi是否进行来连接
         if (context.checkCallingOrSelfPermission(permission.ACCESS_WIFI_STATE)
                 != PackageManager.PERMISSION_GRANTED) {
             return false;
         }
+        //利用系统的ConnectivityManager来进行判断系统是否打开来wifi
         ConnectivityManager connectivityManager = (ConnectivityManager)
                 context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = connectivityManager.getActiveNetworkInfo();
@@ -70,7 +88,9 @@ public class Utils {
         return false;
     }
 
-    //decide can autoplay the ad
+    /**
+     * 决定是否自动播放这个视频，得判断这个的网络环境是什么样的
+     */
     public static boolean canAutoPlay(Context context, SDKConstant.AutoPlaySetting setting) {
         boolean result = true;
         switch (setting) {

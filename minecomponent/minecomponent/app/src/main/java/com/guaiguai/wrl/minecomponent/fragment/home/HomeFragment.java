@@ -19,7 +19,9 @@ import com.guaiguai.wrl.minecomponent.adapter.CourseAdapter;
 import com.guaiguai.wrl.minecomponent.constant.Constant;
 import com.guaiguai.wrl.minecomponent.fragment.BaseFragment;
 import com.guaiguai.wrl.minecomponent.moudle.recommand.BaseRecommandModel;
+import com.guaiguai.wrl.minecomponent.moudle.recommand.RecommandBodyValue;
 import com.guaiguai.wrl.minecomponent.network.http.RequestCenter;
+import com.guaiguai.wrl.minecomponent.util.ImageLoaderManager;
 import com.guaiguai.wrl.minecomponent.view.HomeHeaderLayout;
 import com.guaiguai.wrl.minecomponent.zxing.app.CaptureActivity;
 import com.guaiguai.wrl.mylibrary.okhttp.CommonOkHttpClient;
@@ -27,6 +29,10 @@ import com.guaiguai.wrl.mylibrary.okhttp.listener.DisposeDataHandle;
 import com.guaiguai.wrl.mylibrary.okhttp.listener.DisposeDataListener;
 import com.guaiguai.wrl.mylibrary.okhttp.request.CommonRequest;
 import com.guaiguai.wrl.mylibrary.okhttp.response.CommonJsonCallBack;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.listener.PauseOnScrollListener;
+
+import java.util.ArrayList;
 
 /**
  * Created by WRL on 2017/5/3.
@@ -110,18 +116,19 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
 
     }
 
+
     private void showSuccessView() {
         //保证代码的健壮性，在一次的进行判定，数据是否是完整的
         if (mRecommandData.data.list != null && mRecommandData.data.list.size() > 0) {
             mLoadingView.setVisibility(View.GONE);
             mListView.setVisibility(View.VISIBLE);
-            //增加头部的信息
-//            View view = LayoutInflater.from(mContext).inflate(R.layout.listview_home_head_layout,null);
-//            mListView.addHeaderView(view);
+
             mListView.addHeaderView(new HomeHeaderLayout(mContext, mRecommandData.data.head));
             mAdapter = new CourseAdapter(mContext,mRecommandData.data.list);
             mListView.setAdapter(mAdapter);
-            //进行将数据进行展示
+
+            //这个方法是让listview进行滑动的过程中不进行加载图片
+            mListView.setOnScrollListener(new PauseOnScrollListener(ImageLoader.getInstance(),true,true));
         }else {
             showErrorView();
         }

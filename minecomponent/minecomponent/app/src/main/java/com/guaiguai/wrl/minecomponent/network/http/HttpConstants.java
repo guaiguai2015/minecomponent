@@ -5,10 +5,11 @@ package com.guaiguai.wrl.minecomponent.network.http;
  */
 public class HttpConstants {
 
-    private static final String  ROOT_URL = "http://imooc.com/api";
+//    private static final String  ROOT_URL = "http://imooc.com/api";
+    private static final String  ROOT_URL = "http://yuexibo.top/yxbApp/";
 
     /**
      * 请求HomeFragment的数据
      */
-    public static final String HOME_RECOMMAND = ROOT_URL + "/product/home_recommand.php";
+    public static final String HOME_RECOMMAND = ROOT_URL + "home_data.json";
 }
